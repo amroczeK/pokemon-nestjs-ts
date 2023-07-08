@@ -40,10 +40,7 @@ export class PokemonController {
   update(
     @Param('id', new ParseIntPipe()) id: string,
     @Body(new ValidationPipe()) updatePokemonDto: UpdatePokemonDto,
-  ): Promise<Pokemon> {
-    console.log(updatePokemonDto);
-    const validatedDto = plainToClass(UpdatePokemonDto, updatePokemonDto);
-    console.log(validatedDto);
+  ): Promise<void> {
     return this.pokemonService.update(+id, updatePokemonDto);
   }
 

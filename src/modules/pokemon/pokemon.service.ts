@@ -29,16 +29,12 @@ export class PokemonService {
     return pokemon;
   }
 
-  async update(
-    id: number,
-    updatePokemonDto: UpdatePokemonDto,
-  ): Promise<Pokemon> {
+  async update(id: number, updatePokemonDto: UpdatePokemonDto): Promise<void> {
     const updatedPokemon = await this.pokemonModel
       .findOneAndUpdate({ id }, updatePokemonDto)
       .exec();
 
     if (!updatedPokemon) throw new NotFoundException();
-    return updatedPokemon;
   }
 
   async remove(id: number): Promise<void> {

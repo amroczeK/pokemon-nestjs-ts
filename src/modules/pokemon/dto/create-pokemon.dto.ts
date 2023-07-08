@@ -32,10 +32,10 @@ export class Base {
   Defense: number;
 
   @IsNumber()
-  'Sp. Attack': number;
+  'Sp Attack': number;
 
   @IsNumber()
-  'Sp. Defense': number;
+  'Sp Defense': number;
 
   @IsNumber()
   Speed: number;
