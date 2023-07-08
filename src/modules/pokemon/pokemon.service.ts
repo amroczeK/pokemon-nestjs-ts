@@ -1,26 +1,53 @@
-import { Injectable } from '@nestjs/common';
+import { Model } from 'mongoose';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 import { CreatePokemonDto } from './dto/create-pokemon.dto';
 import { UpdatePokemonDto } from './dto/update-pokemon.dto';
+import { Pokemon } from './schemas/pokemon.schema';
 
 @Injectable()
 export class PokemonService {
-  create(createPokemonDto: CreatePokemonDto) {
-    return 'This action adds a new pokemon';
+  constructor(
+    @InjectModel('gen1') // Collection name
+    private pokemonModel: Model<Pokemon>,
+  ) {}
+
+  async create(createPokemonDto: CreatePokemonDto): Promise<Pokemon> {
+    const createdPokemon = new this.pokemonModel(createPokemonDto);
+    return await createdPokemon.save();
   }
 
-  findAll() {
-    return `This action returns all pokemon`;
+  async findAll(): Promise<Pokemon[]> {
+    return await this.pokemonModel.find().sort({ id: 1 }).exec(); // Get all and sort ascending
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} pokemon`;
+  async findOne(id: number): Promise<Pokemon> {
+    const pokemon = await this.pokemonModel.findOne({ id }).exec();
+
+    if (!pokemon) throw new NotFoundException();
+
+    return pokemon;
   }
 
-  update(id: number, updatePokemonDto: UpdatePokemonDto) {
-    return `This action updates a #${id} pokemon`;
+  async update(
+    id: number,
+    updatePokemonDto: UpdatePokemonDto,
+  ): Promise<Pokemon> {
+    const updatedPokemon = await this.pokemonModel
+      .findOneAndUpdate({ id }, updatePokemonDto)
+      .exec();
+
+    if (!updatedPokemon) throw new NotFoundException();
+    return updatedPokemon;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} pokemon`;
+  async remove(id: number): Promise<void> {
+    const deletedPokemon = await this.pokemonModel
+      .findOneAndDelete({
+        id,
+      })
+      .exec();
+
+    if (!deletedPokemon) throw new NotFoundException();
   }
 }

@@ -13,10 +13,10 @@ export class Base extends Document {
   Defense: number;
 
   @Prop({ required: true })
-  'Sp. Attack': number;
+  'Sp Attack': number;
 
   @Prop({ required: true })
-  'Sp. Defense': number;
+  'Sp Defense': number;
 
   @Prop({ required: true })
   Speed: number;
