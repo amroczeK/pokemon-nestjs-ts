@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { PokemonModule } from './modules/pokemon/pokemon.module';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import Joi from 'joi';
+import * as Joi from 'joi';
 
 @Module({
   imports: [
@@ -15,7 +15,7 @@ import Joi from 'joi';
         MONGO_DB_URL: Joi.string(),
       }),
       validationOptions: {
-        allowUnknown: false,
+        allowUnknown: true,
         abortEarly: true,
       },
     }),
