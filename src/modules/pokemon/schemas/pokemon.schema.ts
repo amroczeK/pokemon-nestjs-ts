@@ -16,9 +16,6 @@ export class Pokemon extends Document {
 
   @Prop({ required: true })
   base: Base;
-
-  @Prop({ required: true })
-  event: Event;
 }
 
 export const PokemonSchema = SchemaFactory.createForClass(Pokemon);
