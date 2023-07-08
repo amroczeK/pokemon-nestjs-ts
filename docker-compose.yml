@@ -1,0 +1,38 @@
+version: '3.9'
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongodb_pokemon
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongodbdata:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: pokemon
+
+  nestjs:
+    build:
+      context: .
+      dockerfile: ./devops/Dockerfile
+    container_name: nestjs_pokemon
+    image: nestjs/pokemon
+    ports:
+      - 3000:3000
+    volumes:
+      - ./src:/usr/src/app/src
+    environment:
+      - MONGO_DB_URL="mongodb://root:password@mongodb_pokemon:27017/?authSource=admin"
+      - NODE_ENV=development
+    depends_on:
+      - mongo
+
+  mongo-seed:
+    image: mongo:latest
+    volumes:
+      - ./config/data:/config/data
+    depends_on:
+      - mongo
+    command: mongoimport --uri "mongodb://root:password@mongodb_pokemon:27017/?authSource=admin" --db pokemon --collection gen1 --type json --file /config/data/pokemon-gen1.json --jsonArray
