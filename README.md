@@ -1,6 +1,6 @@
 ## Description
 
-Simple NestJS CRUD API application using Pokemon Gen 1 dataset demonstrating:
+Simple NestJS RESTful API CRUD application using Pokemon Gen 1 dataset demonstrating:
 
 - Application, MongoDB containerization in Docker and database seeding.
 - Volume mapping and persisting database data in db container.
