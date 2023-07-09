@@ -13,6 +13,11 @@ Simple NestJS CRUD API application using Pokemon Gen 1 dataset demonstrating:
 - Mitigating common attack vectors by setting HTTP response headers using Helmet.
 - Rate limiting to prevent-brute force attacks, by limiting application to 10 requests within 60 second time period as an example.
 
+### Todo implementations
+- Containerize and configure API Gateway.
+- Authentication and Authorization, secure endpoints.
+- Microservices Architecture
+
 ## Prerequisites
 
 - Docker
