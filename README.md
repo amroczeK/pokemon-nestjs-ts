@@ -1,5 +1,7 @@
 ## Description
+
 Simple NestJS CRUD API application using Pokemon Gen 1 dataset demonstrating:
+
 - Application, MongoDB containerization in Docker and database seeding.
 - Volume mapping and persisting database data in db container.
 - Environment variable configuration and validation.
@@ -8,12 +10,16 @@ Simple NestJS CRUD API application using Pokemon Gen 1 dataset demonstrating:
 - Validating API request BODY and PARAMS based on DTO's using pipes.
 - Annotating schemas, dto's and controllers.
 - Creation and usage of Data Transfer Objects and Mongoose Schemas.
+- Mitigating common attack vectors by setting HTTP response headers using Helmet.
+- Rate limiting to prevent-brute force attacks, by limiting application to 10 requests within 60 second time period as an example.
 
 ## Prerequisites
+
 - Docker
 - Node v18+ (if running locally)
 
 ## Setup
+
 Use docker compose to setup the docker environment for the application. The docker compose file contains all the configurations and commands required to build the application, database and seed the dataset into the db.
 
 ```bash
@@ -22,6 +28,7 @@ $ docker compose up -d
 ```
 
 ## Running the NestJS application locally outside of Docker environment
+
 If you want to run the application locally in development/watch mode, follow these steps:
 
 ```bash

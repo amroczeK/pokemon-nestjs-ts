@@ -3,6 +3,7 @@ import { PokemonModule } from './modules/pokemon/pokemon.module';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import * as Joi from 'joi';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -18,6 +19,10 @@ import * as Joi from 'joi';
         allowUnknown: true,
         abortEarly: true,
       },
+    }),
+    ThrottlerModule.forRoot({
+      ttl: 60,
+      limit: 10,
     }),
     MongooseModule.forRoot(process.env.MONGO_DB_URL),
     PokemonModule,

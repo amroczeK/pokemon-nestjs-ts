@@ -2,9 +2,13 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { VersioningType } from '@nestjs/common';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Secure app by setting HTTP response headers refer to: https://www.npmjs.com/package/helmet
+  app.use(helmet());
 
   app.enableVersioning({
     type: VersioningType.URI,
