@@ -32,7 +32,7 @@ export class PokemonController {
 
   @Get()
   @Version('1')
-  @ApiResponse({ status: 200, type: [Pokemon] })
+  @ApiResponse({ status: 200, type: [CreatePokemonDto] })
   @ApiOperation({ summary: 'Fetch all pokemon from database.' })
   findAll(): Promise<Pokemon[]> {
     return this.pokemonService.findAll();
@@ -41,7 +41,7 @@ export class PokemonController {
   @Get(':id')
   @Version('1')
   @ApiOperation({ summary: 'Fetch pokemon by pokedex number from database.' })
-  @ApiResponse({ status: 200, type: Pokemon })
+  @ApiResponse({ status: 200, type: CreatePokemonDto })
   @ApiResponse({ status: 404, description: 'Pokemon not found.' })
   findOne(@Param('id', new ParseIntPipe()) id: string): Promise<Pokemon> {
     return this.pokemonService.findOne(+id);
