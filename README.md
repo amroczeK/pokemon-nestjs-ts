@@ -32,6 +32,9 @@ Use docker compose to setup the docker environment for the application. The dock
 $ docker compose up -d
 ```
 
+## Swagger
+You can interact with the API's through the Swagger UI hosted on http://localhost:3000/api
+
 ## Running the NestJS application locally outside of Docker environment
 
 If you want to run the application locally in development/watch mode, follow these steps:
