@@ -14,6 +14,7 @@ import { CreatePokemonDto } from './dto/create-pokemon.dto';
 import { UpdatePokemonDto } from './dto/update-pokemon.dto';
 import { ValidationPipe } from 'src/pipes/validation.pipe';
 import { Pokemon } from './schemas/pokemon.schema';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Controller('pokemon')
 export class PokemonController {
@@ -21,6 +22,8 @@ export class PokemonController {
 
   @Post()
   @Version('1')
+  @ApiOperation({ summary: 'Write pokemon to database.' })
+  @ApiResponse({ status: 201 })
   create(
     @Body(new ValidationPipe()) createPokemonDto: CreatePokemonDto,
   ): Promise<Pokemon> {
@@ -29,18 +32,28 @@ export class PokemonController {
 
   @Get()
   @Version('1')
+  @ApiResponse({ status: 200, type: [Pokemon] })
+  @ApiOperation({ summary: 'Fetch all pokemon from database.' })
   findAll(): Promise<Pokemon[]> {
     return this.pokemonService.findAll();
   }
 
   @Get(':id')
   @Version('1')
+  @ApiOperation({ summary: 'Fetch pokemon by pokedex number from database.' })
+  @ApiResponse({ status: 200, type: Pokemon })
+  @ApiResponse({ status: 404, description: 'Pokemon not found.' })
   findOne(@Param('id', new ParseIntPipe()) id: string): Promise<Pokemon> {
     return this.pokemonService.findOne(+id);
   }
 
   @Patch(':id')
   @Version('1')
+  @ApiOperation({
+    summary: 'Update base stats of pokemon by pokedex number in database.',
+  })
+  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 404, description: 'Pokemon not found.' })
   update(
     @Param('id', new ParseIntPipe()) id: string,
     @Body(new ValidationPipe()) updatePokemonDto: UpdatePokemonDto,
@@ -50,6 +63,9 @@ export class PokemonController {
 
   @Delete(':id')
   @Version('1')
+  @ApiOperation({ summary: 'Delete pokemon by pokedex number from database.' })
+  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 404, description: 'Pokemon not found.' })
   remove(@Param('id', new ParseIntPipe()) id: string): Promise<void> {
     return this.pokemonService.remove(+id);
   }
