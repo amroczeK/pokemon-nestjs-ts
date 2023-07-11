@@ -24,7 +24,7 @@ services:
     volumes:
       - ./src:/usr/src/app/src
     environment:
-      - MONGO_DB_URL="mongodb://root:password@mongodb_pokemon:27017/?authSource=admin"
+      - MONGO_DB_URL=mongodb://root:password@mongodb_pokemon:27017/?authSource=admin
       - NODE_ENV=development
     depends_on:
       - mongo
