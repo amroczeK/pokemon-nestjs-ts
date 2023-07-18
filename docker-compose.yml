@@ -1,9 +1,62 @@
 version: '3.9'
+
 services:
+  pokemon-service:
+    build:
+      context: .
+      dockerfile: ./devops/Dockerfile
+    hostname: pokemon-service
+    container_name: pokemon-service
+    image: nestjs/pokemon
+    networks:
+      - kong-net
+    volumes:
+      - ./src:/usr/src/app/src
+    environment:
+      - MONGO_DB_URL=mongodb://root:password@mongodb_pokemon:27017/pokemon?authSource=admin
+      - NODE_ENV=development
+    depends_on:
+      - mongo
+      - kong-api-gateway
+
+  kong-api-gateway:
+    image: '${KONG_DOCKER_TAG:-kong:latest}'
+    hostname: kong-api-gateway
+    container_name: kong-api-gateway
+    environment:
+      KONG_DATABASE: 'off'
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: '${KONG_ADMIN_LISTEN:-0.0.0.0:8001}'
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_LISTEN: '${KONG_PROXY_LISTEN:-0.0.0.0:8000}'
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_DECLARATIVE_CONFIG: '/opt/kong/kong.yaml'
+    networks:
+      - kong-net
+    ports:
+      # The following two environment variables default to an insecure value (0.0.0.0) according to the CIS Security test.
+      - '${KONG_INBOUND_PROXY_LISTEN:-0.0.0.0}:8000:8000/tcp'
+      - '${KONG_INBOUND_SSL_PROXY_LISTEN:-0.0.0.0}:8443:8443/tcp'
+      - '127.0.0.1:8001:8001/tcp'
+      - '127.0.0.1:8444:8444/tcp'
+    healthcheck:
+      test: ['CMD', 'kong', 'health']
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    restart: on-failure:5
+    volumes:
+      - ./config/kong:/opt/kong
+    security_opt:
+      - no-new-privileges
+
   mongo:
     image: mongo:latest
     container_name: mongodb_pokemon
     restart: always
+    networks:
+      - kong-net
     ports:
       - 27017:27017
     volumes:
@@ -13,26 +66,18 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: password
       MONGO_INITDB_DATABASE: pokemon
 
-  nestjs:
-    build:
-      context: .
-      dockerfile: ./devops/Dockerfile
-    container_name: nestjs_pokemon
-    image: nestjs/pokemon
-    ports:
-      - 3000:3000
-    volumes:
-      - ./src:/usr/src/app/src
-    environment:
-      - MONGO_DB_URL=mongodb://root:password@mongodb_pokemon:27017/pokemon?authSource=admin
-      - NODE_ENV=development
-    depends_on:
-      - mongo
-
   mongo-seed:
     image: mongo:latest
-    volumes:
-      - ./config/data:/config/data
+    container_name: mongodb_pokemon_seed
+    command: ./config/data/import.sh
+    networks:
+      - kong-net
     depends_on:
       - mongo
-    command: mongoimport --uri "mongodb://root:password@mongodb_pokemon:27017/?authSource=admin" --db pokemon --collection gen1 --type json --file /config/data/pokemon-gen1.json --jsonArray
+    volumes:
+      - ./config/data:/config/data
+
+networks:
+  kong-net:
+    external: false
+    name: kong-net
