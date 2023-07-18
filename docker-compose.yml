@@ -7,7 +7,6 @@ services:
       dockerfile: ./devops/Dockerfile
     hostname: pokemon-service
     container_name: pokemon-service
-    image: nestjs/pokemon
     networks:
       - kong-net
     volumes:
@@ -18,6 +17,32 @@ services:
     depends_on:
       - mongo
       - kong-api-gateway
+
+  mongo:
+    image: mongo:latest
+    container_name: mongodb_pokemon
+    restart: always
+    networks:
+      - kong-net
+    ports:
+      - 27017:27017
+    volumes:
+      - ./volumes/mongodbdata:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: pokemon
+
+  mongo-seed:
+    image: mongo:latest
+    container_name: mongodb_pokemon_seed
+    command: ./config/data/import.sh
+    networks:
+      - kong-net
+    depends_on:
+      - mongo
+    volumes:
+      - ./config/data:/config/data
 
   kong-api-gateway:
     image: '${KONG_DOCKER_TAG:-kong:latest}'
@@ -51,33 +76,48 @@ services:
     security_opt:
       - no-new-privileges
 
-  mongo:
-    image: mongo:latest
-    container_name: mongodb_pokemon
-    restart: always
+  keycloak-iam:
+    build:
+      context: .
+      dockerfile: ./devops/Keycloak.Dockerfile
+    hostname: keycloak-iam
+    container_name: keycloak-iam
+    command: start-dev
     networks:
-      - kong-net
+      - keycloak-net
     ports:
-      - 27017:27017
-    volumes:
-      - ./mongodbdata:/data/db
+      - 9080:8080
+      - 9443:8443
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: password
-      MONGO_INITDB_DATABASE: pokemon
-
-  mongo-seed:
-    image: mongo:latest
-    container_name: mongodb_pokemon_seed
-    command: ./config/data/import.sh
-    networks:
-      - kong-net
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+      KC_DB_USERNAME: keycloakdbuser
+      KC_DB_PASSWORD: keycloakdbsecret
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: keycloakpassword
     depends_on:
-      - mongo
+      - keycloak-db
+
+  keycloak-db:
+    image: postgres:latest
+    restart: always
+    hostname: keycloak-db
+    container_name: keycloak-db
+    networks:
+      - keycloak-net
+    ports:
+      - 5432:5432
     volumes:
-      - ./config/data:/config/data
+      - ./volumes/keycloakdbdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: keycloakdbuser
+      POSTGRES_PASSWORD: keycloakdbsecret
+      POSTGRES_DB: keycloak
 
 networks:
   kong-net:
     external: false
     name: kong-net
+  keycloak-net:
+    external: false
+    name: keycloak-net
