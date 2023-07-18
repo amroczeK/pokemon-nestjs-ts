@@ -6,6 +6,7 @@ import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.setGlobalPrefix('api');
 
   // Secure app by setting HTTP response headers refer to: https://www.npmjs.com/package/helmet
   app.use(helmet());

@@ -1,6 +1,6 @@
 ## Description
 
-Simple NestJS RESTful API CRUD application using Pokemon Gen 1 dataset demonstrating:
+Simple NestJS RESTful API CRUD fullstack application using Pokemon Gen 1 dataset demonstrating:
 
 - Application, MongoDB containerization in Docker and database seeding.
 - Volume mapping and persisting database data in db container.
@@ -12,9 +12,10 @@ Simple NestJS RESTful API CRUD application using Pokemon Gen 1 dataset demonstra
 - Creation and usage of Data Transfer Objects and Mongoose Schemas.
 - Mitigating common attack vectors by setting HTTP response headers using Helmet.
 - Rate limiting to prevent-brute force attacks, by limiting application to 10 requests within 60 second time period as an example.
+- Implementation and usage of open source API gateway proxying traffic to services within Docker network. [Kong API Gateway](https://docs.konghq.com/gateway/latest/)
 
 ### Todo implementations
-- Containerize and configure API Gateway.
+- Containerize and configure API Gateway. (Completed using [Kong API Gateway](https://docs.konghq.com/gateway/latest/))
 - Authentication and Authorization, secure endpoints.
 - Microservices Architecture
 
@@ -33,7 +34,12 @@ $ docker compose up -d
 ```
 
 ## Swagger
-You can interact with the API's through the Swagger UI hosted on http://localhost:3000/api
+The pokemon service sits behind an API Gateway, you can interact with the API's through the Swagger UI via http://localhost:8000/api
+
+You can also make CURL requests: 
+```bash
+$ curl http://localhost:8000/api/v1/pokemon
+```
 
 ## Running the NestJS application locally outside of Docker environment
 
