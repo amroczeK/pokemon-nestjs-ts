@@ -69,13 +69,14 @@ services:
   mongo-seed:
     image: mongo:latest
     container_name: mongodb_pokemon_seed
-    command: ./config/data/import.sh
     networks:
       - kong-net
     depends_on:
       - mongo
     volumes:
       - ./config/data:/config/data
+    # Using upsert mode and upsertField id will replace existing db data if you try re-run mongo-seed service
+    command: mongoimport --host mongodb_pokemon -u root -p password --authenticationDatabase admin --db pokemon --collection gen1 --type json --file /config/data/pokemon-gen1.json --jsonArray --mode upsert --upsertFields id
 
 networks:
   kong-net:
