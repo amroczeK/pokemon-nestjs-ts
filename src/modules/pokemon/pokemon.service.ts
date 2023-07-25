@@ -1,5 +1,9 @@
 import { Model } from 'mongoose';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreatePokemonDto } from './dto/create-pokemon.dto';
 import { UpdatePokemonDto } from './dto/update-pokemon.dto';
@@ -13,6 +17,13 @@ export class PokemonService {
   ) {}
 
   async create(createPokemonDto: CreatePokemonDto): Promise<Pokemon> {
+    const existingPokemon = await this.pokemonModel.findOne({
+      id: createPokemonDto.id,
+    });
+    if (existingPokemon)
+      throw new ConflictException(
+        'A document with the same pokedex id already exists.',
+      );
     const createdPokemon = new this.pokemonModel(createPokemonDto);
     return await createdPokemon.save();
   }
