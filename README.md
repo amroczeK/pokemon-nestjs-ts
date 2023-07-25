@@ -100,6 +100,12 @@ Configure a client with the appropriate details:
 - **Web origins:** `*`
 
 7. After clicking `Save` Keycloak navigates you to the `Client details` page for `pokemon-service`.
+8. Create a new User inside of the `pokemon` realm. Click on `Users` in the side menu and click `Add user`.
+9. Use this configuration (ignore the other fields) and click `Create`:
+- **Username**: pokemonuser
+- **Email verified**: Yes
+10. Keycloak will navigate you to the `User details` page for `pokemonuser` after clicking `Create`. Now click on `Credentials` and `Set password`.
+11. Use the password `pokemonuser` and set **Temporary** to `Off`, click `Save` and `Save password` to confirm.
 
 After these steps are completed proceed to **[Kong](#kong)**.
 
