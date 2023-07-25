@@ -1,5 +1,10 @@
 version: '3.9'
 
+networks:
+  kong-net:
+    driver: bridge
+  keycloak-net:
+
 services:
   pokemon-service:
     build:
@@ -24,8 +29,6 @@ services:
     restart: always
     networks:
       - kong-net
-    ports:
-      - 27017:27017
     volumes:
       - ./volumes/mongodbdata:/data/db
     environment:
@@ -36,45 +39,62 @@ services:
   mongo-seed:
     image: mongo:latest
     container_name: mongodb_pokemon_seed
-    command: ./config/data/import.sh
     networks:
       - kong-net
     depends_on:
       - mongo
     volumes:
       - ./config/data:/config/data
+    # Using upsert mode and upsertField id will replace existing db data if you try re-run mongo-seed service
+    command: mongoimport --host mongodb_pokemon -u root -p password --authenticationDatabase admin --db pokemon --collection gen1 --type json --file /config/data/pokemon-gen1.json --jsonArray --mode upsert --upsertFields id
 
   kong-api-gateway:
-    image: '${KONG_DOCKER_TAG:-kong:latest}'
+    image: cristianchiru/docker-kong-oidc
+    depends_on:
+      - kong-db
     hostname: kong-api-gateway
     container_name: kong-api-gateway
+    networks:
+      - kong-net
+    volumes:
+      - ./config/kong:/opt/kong
+    ports:
+      - '8000:8000/tcp' # Listener
+      - '8443:8443/tcp' # Listener (SSL)
+      - '127.0.0.1:8001:8001/tcp' # Admin API
+      - '127.0.0.1:8444:8444/tcp' # Admin API (SSL)
     environment:
       KONG_DATABASE: 'off'
       KONG_ADMIN_ACCESS_LOG: /dev/stdout
       KONG_ADMIN_ERROR_LOG: /dev/stderr
-      KONG_ADMIN_LISTEN: '${KONG_ADMIN_LISTEN:-0.0.0.0:8001}'
       KONG_PROXY_ACCESS_LOG: /dev/stdout
-      KONG_PROXY_LISTEN: '${KONG_PROXY_LISTEN:-0.0.0.0:8000}'
       KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: '${KONG_ADMIN_LISTEN:-0.0.0.0:8001}'
+      KONG_PROXY_LISTEN: '${KONG_PROXY_LISTEN:-0.0.0.0:8000}'
       KONG_DECLARATIVE_CONFIG: '/opt/kong/kong.yaml'
-    networks:
-      - kong-net
-    ports:
-      # The following two environment variables default to an insecure value (0.0.0.0) according to the CIS Security test.
-      - '${KONG_INBOUND_PROXY_LISTEN:-0.0.0.0}:8000:8000/tcp'
-      - '${KONG_INBOUND_SSL_PROXY_LISTEN:-0.0.0.0}:8443:8443/tcp'
-      - '127.0.0.1:8001:8001/tcp'
-      - '127.0.0.1:8444:8444/tcp'
+      KONG_PLUGINS: bundled,oidc
     healthcheck:
       test: ['CMD', 'kong', 'health']
       interval: 10s
       timeout: 10s
       retries: 10
     restart: on-failure:5
-    volumes:
-      - ./config/kong:/opt/kong
     security_opt:
       - no-new-privileges
+
+  kong-db:
+    image: postgres:latest
+    restart: always
+    hostname: kong-db
+    container_name: kong-db
+    networks:
+      - kong-net
+    volumes:
+      - ./volumes/kongdbdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: kong
+      POSTGRES_PASSWORD: kong
+      POSTGRES_DB: kong
 
   keycloak-iam:
     build:
@@ -91,10 +111,10 @@ services:
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
-      KC_DB_USERNAME: keycloakdbuser
-      KC_DB_PASSWORD: keycloakdbsecret
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: password
       KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: keycloakpassword
+      KEYCLOAK_ADMIN_PASSWORD: admin
     depends_on:
       - keycloak-db
 
@@ -105,19 +125,9 @@ services:
     container_name: keycloak-db
     networks:
       - keycloak-net
-    ports:
-      - 5432:5432
     volumes:
       - ./volumes/keycloakdbdata:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: keycloakdbuser
-      POSTGRES_PASSWORD: keycloakdbsecret
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
       POSTGRES_DB: keycloak
-
-networks:
-  kong-net:
-    external: false
-    name: kong-net
-  keycloak-net:
-    external: false
-    name: keycloak-net
