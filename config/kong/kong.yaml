@@ -15,7 +15,16 @@ services:
           - PUT
           - PATCH
           - DELETE
-        path_handling: v1
+        path_handling: v0
         paths:
           - /
         strip_path: true
+        preserve_host: false
+    plugins:
+      - name: oidc
+        config:
+          client_id: 'pokemon-service'
+          client_secret: '<update if using client authentication confidential access type for OIDC>'
+          realm: pokemon
+          introspection_endpoint: 'http://192.168.0.20:9080/realms/pokemon/protocol/openid-connect/token/introspect'
+          discovery: 'http://192.168.0.20:9080/realms/pokemon/.well-known/openid-configuration'
