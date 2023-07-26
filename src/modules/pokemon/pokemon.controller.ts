@@ -25,6 +25,10 @@ export class PokemonController {
   @Version('1')
   @ApiOperation({ summary: 'Write pokemon to database.' })
   @ApiResponse({ status: 201 })
+  @ApiResponse({
+    status: 409,
+    description: 'A document with the same pokedex id already exists.',
+  })
   create(
     @Body(new ValidationPipe()) createPokemonDto: CreatePokemonDto,
   ): Promise<Pokemon> {

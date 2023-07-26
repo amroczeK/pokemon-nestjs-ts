@@ -17,8 +17,8 @@ services:
           - DELETE
         path_handling: v0
         paths:
-          - /
-        strip_path: true
+          - /swagger
+        strip_path: false
         preserve_host: false
     plugins:
       - name: oidc

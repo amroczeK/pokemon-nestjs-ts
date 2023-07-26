@@ -5,7 +5,9 @@ import { Name } from './name.schema';
 
 @Schema()
 export class Pokemon extends Document {
-  @Prop({ required: true })
+  // 'id' is the Pokemon Pokedex number which is unique
+  // This will prevent a document being saved with the same pokedex number
+  @Prop({ required: true, index: true, unique: true })
   id: number;
 
   @Prop({ required: true })
