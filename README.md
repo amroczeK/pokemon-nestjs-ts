@@ -15,6 +15,8 @@ Simple NestJS RESTful API CRUD fullstack application using Pokemon Gen 1 dataset
 - Implementation and usage of open source API gateway proxying traffic to services within Docker network. [Kong API Gateway](https://docs.konghq.com/gateway/latest/)
 - Secure the client (Swagger UI), preventing unauthenticated requests to backend API's using Kong, Keycloak and OpenID Connect (OIDC).
 
+NOTE: This personal project was rushed as a learning/upskilling exercise and is not production quality.
+
 #### Todo implementations:
 
 - Authorization/Role-based access control to determine what users can do.
